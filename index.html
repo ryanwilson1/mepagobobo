@@ -23,9 +23,21 @@
     background: #ffffff;
     border-radius: 8px;
     cursor: pointer;
+    color: #2c2c2a;
   }
   button:hover { background: #f1efe8; }
   button:active { transform: scale(0.98); }
+  input {
+    font-family: inherit;
+    border: 0.5px solid #d3d1c7;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #2c2c2a;
+    background: #ffffff;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  #spinner { animation: spin 1s linear infinite; }
 </style>
 </head>
 <body>
@@ -33,13 +45,12 @@
 <div style="width:100%;max-width:360px;margin:0 auto;background:#ffffff;border-radius:16px;border:0.5px solid #d3d1c7;overflow:hidden;">
   <div style="padding:12px 14px;border-bottom:0.5px solid #d3d1c7;display:flex;align-items:center;gap:8px;">
     <i class="ti ti-calculator" style="font-size:18px;color:#185fa5;" aria-hidden="true"></i>
-    <span style="font-weight:600;font-size:15px;color:#2c2c2a;">Ryan te ajuda</span>
+    <span style="font-weight:600;font-size:15px;">Ryan te ajuda</span>
     <span style="margin-left:auto;font-size:10px;background:#eeedfe;color:#26215c;padding:3px 7px;border-radius:8px;">PRO</span>
   </div>
 
-  <div style="padding:12px;">
-    <input id="display" type="text" readonly value="0" style="width:100%;text-align:right;font-size:24px;font-weight:600;border:none;background:#f1efe8;border-radius:8px;padding:12px 10px;margin-bottom:10px;box-sizing:border-box;color:#2c2c2a;" />
-
+  <div id="screen-calc" style="padding:12px;">
+    <input id="display" type="text" readonly value="0" style="width:100%;text-align:right;font-size:24px;font-weight:600;background:#f1efe8;padding:12px 10px;margin-bottom:10px;" />
     <div id="keys" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;"></div>
   </div>
 
@@ -47,19 +58,56 @@
     <div style="padding:14px;">
       <p style="font-size:12px;color:#5f5e5a;margin:0 0 10px;text-align:center;">A resposta está pronta. Escolha um plano pra revelar:</p>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="plano-mensal" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;color:#2c2c2a;">
+        <button class="plano-btn" data-plano="Mensal · R$ 29,90" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;">
           <span>Plano mensal</span><span style="font-weight:600;">R$ 29,90/mês</span>
         </button>
-        <button id="plano-anual" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border:2px solid #378add;font-size:13px;color:#2c2c2a;">
+        <button class="plano-btn" data-plano="Anual · R$ 199,90" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border:2px solid #378add;font-size:13px;">
           <span style="font-size:10px;background:#e6f1fb;color:#0c447c;padding:2px 6px;border-radius:8px;">Mais popular</span>
           <span style="display:flex;justify-content:space-between;width:100%;"><span>Plano anual</span><span style="font-weight:600;">R$ 199,90/ano</span></span>
         </button>
-        <button id="plano-unico" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;color:#2c2c2a;">
+        <button class="plano-btn" data-plano="Resposta única · R$ 9,90" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;font-size:13px;">
           <span>Resposta única</span><span style="font-weight:600;">R$ 9,90</span>
         </button>
       </div>
       <p style="font-size:10px;color:#888780;margin:10px 0 0;text-align:center;">Cancele quando quiser. Resultado não incluso.</p>
     </div>
+  </div>
+
+  <div id="screen-checkout" style="display:none;padding:16px;border-top:0.5px solid #d3d1c7;">
+    <p style="font-size:12px;color:#5f5e5a;margin:0 0 10px;" id="checkout-plano">Plano selecionado</p>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button id="tab-cartao" style="flex:1;font-size:12px;padding:8px 0;background:#f1efe8;">Cartão</button>
+      <button id="tab-pix" style="flex:1;font-size:12px;padding:8px 0;">Pix</button>
+    </div>
+
+    <div id="form-cartao">
+      <input placeholder="Número do cartão" style="width:100%;margin-bottom:8px;" maxlength="19" />
+      <input placeholder="Nome impresso no cartão" style="width:100%;margin-bottom:8px;" />
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input placeholder="MM/AA" style="flex:1;" maxlength="5" />
+        <input placeholder="CVV" style="flex:1;" maxlength="4" />
+      </div>
+    </div>
+
+    <div id="form-pix" style="display:none;text-align:center;padding:12px 0;">
+      <div style="width:140px;height:140px;margin:0 auto 10px;background:repeating-conic-gradient(#888780 0% 25%, #f1efe8 0% 50%) 0 0/20px 20px;border-radius:8px;"></div>
+      <p style="font-size:11px;color:#888780;margin:0;">QR ilustrativo — não é um Pix real</p>
+    </div>
+
+    <button id="btn-pagar" style="width:100%;background:#378add;color:#ffffff;border:none;padding:12px 0;font-size:14px;margin-top:6px;">Finalizar pagamento</button>
+    <button id="btn-voltar" style="width:100%;margin-top:8px;font-size:12px;">Voltar</button>
+  </div>
+
+  <div id="screen-processando" style="display:none;padding:30px 16px;text-align:center;">
+    <i class="ti ti-loader-2" id="spinner" style="font-size:32px;color:#185fa5;display:inline-block;" aria-hidden="true"></i>
+    <p style="font-size:13px;color:#5f5e5a;margin-top:12px;">Processando pagamento...</p>
+  </div>
+
+  <div id="screen-recusado" style="display:none;padding:24px 16px;text-align:center;">
+    <i class="ti ti-mood-confuzed" style="font-size:36px;color:#a32d2d;" aria-hidden="true"></i>
+    <p style="font-weight:600;font-size:15px;margin:10px 0 4px;">Pagamento recusado</p>
+    <p style="font-size:12px;color:#5f5e5a;margin:0 0 16px;">Motivo: este app é zoeira e não existe cobrança nenhuma 😂</p>
+    <button id="btn-reiniciar" style="width:100%;padding:10px 0;font-size:13px;">Tentar de novo</button>
   </div>
 </div>
 
@@ -77,7 +125,6 @@ keys.forEach(k => {
   btn.style.padding = '14px 0';
   btn.style.minHeight = '44px';
   btn.style.touchAction = 'manipulation';
-  btn.style.color = '#2c2c2a';
   if (k === '=') {
     btn.style.background = '#378add';
     btn.style.color = '#ffffff';
@@ -114,9 +161,59 @@ function handleKey(k) {
   display.value = expr;
 }
 
-document.getElementById('plano-mensal').onclick = () => alert('Zoeira! Não existe plano de verdade 😂');
-document.getElementById('plano-anual').onclick = () => alert('Zoeira! Não existe plano de verdade 😂');
-document.getElementById('plano-unico').onclick = () => alert('Zoeira! Não existe plano de verdade 😂');
+const screenCalc = document.getElementById('screen-calc');
+const screenCheckout = document.getElementById('screen-checkout');
+const screenProcessando = document.getElementById('screen-processando');
+const screenRecusado = document.getElementById('screen-recusado');
+const checkoutPlano = document.getElementById('checkout-plano');
+
+document.querySelectorAll('.plano-btn').forEach(b => {
+  b.onclick = () => {
+    checkoutPlano.textContent = 'Plano selecionado: ' + b.dataset.plano;
+    screenCalc.style.display = 'none';
+    paywall.style.display = 'none';
+    screenCheckout.style.display = 'block';
+  };
+});
+
+const tabCartao = document.getElementById('tab-cartao');
+const tabPix = document.getElementById('tab-pix');
+const formCartao = document.getElementById('form-cartao');
+const formPix = document.getElementById('form-pix');
+
+tabCartao.onclick = () => {
+  tabCartao.style.background = '#f1efe8';
+  tabPix.style.background = '#ffffff';
+  formCartao.style.display = 'block';
+  formPix.style.display = 'none';
+};
+tabPix.onclick = () => {
+  tabPix.style.background = '#f1efe8';
+  tabCartao.style.background = '#ffffff';
+  formPix.style.display = 'block';
+  formCartao.style.display = 'none';
+};
+
+document.getElementById('btn-voltar').onclick = () => {
+  screenCheckout.style.display = 'none';
+  screenCalc.style.display = 'block';
+};
+
+document.getElementById('btn-pagar').onclick = () => {
+  screenCheckout.style.display = 'none';
+  screenProcessando.style.display = 'block';
+  setTimeout(() => {
+    screenProcessando.style.display = 'none';
+    screenRecusado.style.display = 'block';
+  }, 1800);
+};
+
+document.getElementById('btn-reiniciar').onclick = () => {
+  screenRecusado.style.display = 'none';
+  expr = '';
+  display.value = '0';
+  screenCalc.style.display = 'block';
+};
 </script>
 
 </body>
